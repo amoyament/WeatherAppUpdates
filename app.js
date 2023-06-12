@@ -36,14 +36,27 @@ app.post("/", function (req, res) {
     response.on("data", function (data) {
       const jsondataPlug = JSON.parse(data);
       // console.log(jsondataPlug);
+      // The error handling cannot go here because we have not yet pulled the data with the cod property (Move to line 61)
       // if (jsondataPlug.cod !== 200) {
       //   console.log(jsondataPlug);
       //   res.statusCode = 400;
       //   res.send();
       //   return;
       // }
+      // But let's look into error handling for entering nivalid input here.
+      // If else to tell the user if an invalid city or zipcode is entered
+      // If an zip that does not have a matching latitude is entered, return message saying so
+      if (isZip && !jsondataPlug.lat) {
+        res.send(`<h1>I'm sorry, ${cityName} is an invalid zip code. 🙁</h1>`);
+        return;
+        // If a city is entered and the array does not exist (or is empty '=== 0'), return the message saying it is an invalid city
+      } else if (!isZip && jsondataPlug.length === 0) {
+        res.send(`<h1>I'm sorry, ${cityName} is an invalid city. 🙁</h1>`);
+        return;
+      }
+      // At first, these two if else statements were separate, but now after adding error handling for invalid input, we can mush them together
       // if isZip = true, there is no array of lat and lon
-      if (isZip) {
+      else if (isZip) {
         lat = jsondataPlug.lat;
         long = jsondataPlug.lon;
       } else {
@@ -55,9 +68,11 @@ app.post("/", function (req, res) {
       https.get(url, function (response) {
         response.on("data", function (data) {
           const jsondata = JSON.parse(data);
-          console.log(jsondata);
+          // console.log(jsondata);
+          // Error handling here because this jsondata is where the cod property lives
+          //Error handling (If status code is not 200, log error code to console)
           if (jsondata.cod !== 200) {
-            console.log(`Error: ${jsondata.cod}`);
+            console.log(`Error Code: ${jsondata.cod}`);
             res.statusCode = 400;
             res.send();
             return;
@@ -78,6 +93,7 @@ app.post("/", function (req, res) {
 });
 
 app.listen(9000);
+//__________________________STILL NEED TO ADD ERROR HANDLING FOR IF CITY/ZIP IS NOT FOUND
 
 // ______________________ API INFO LINK: https://openweathermap.org/api/geocoding-api
 
