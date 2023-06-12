@@ -55,15 +55,22 @@ app.post("/", function (req, res) {
       https.get(url, function (response) {
         response.on("data", function (data) {
           const jsondata = JSON.parse(data);
-          // console.log(jsondata);
-          const temp = jsondata.main.temp;
-          const des = jsondata.weather[0].description;
-          const icon = jsondata.weather[0].icon;
-          const imageurl = "http://openweathermap.org/img/wn/" + icon + "@2x.png";
-          res.write(`<h1>The temp in ${cityName} is ${temp} degrees</h1>`);
-          res.write(`<p>The weather description is ${des} </p>`);
-          res.write("<img src=" + imageurl + ">");
-          res.send();
+          console.log(jsondata);
+          if (jsondata.cod !== 200) {
+            console.log(`Error: ${jsondata.cod}`);
+            res.statusCode = 400;
+            res.send();
+            return;
+          } else {
+            const temp = jsondata.main.temp;
+            const des = jsondata.weather[0].description;
+            const icon = jsondata.weather[0].icon;
+            const imageurl = "http://openweathermap.org/img/wn/" + icon + "@2x.png";
+            res.write(`<h1>The temp in ${cityName} is ${temp} degrees</h1>`);
+            res.write(`<p>The weather description is ${des} </p>`);
+            res.write("<img src=" + imageurl + ">");
+            res.send();
+          }
         });
       });
     });
